@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}SchemeSaathi — Scheme Finder{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>🇮🇳</text></svg>">
+  {% block head %}{% endblock %}
+
+  <!-- ① Prevent flash of wrong theme on page load -->
+  <script>
+    (function () {
+      const saved = localStorage.getItem('schemeSaathiTheme');
+      if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    })();
+  </script>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <a href="{{ url_for('index') }}" class="nav-brand">
+    <div class="brand-icon">🇮🇳</div>
+    SchemeSaathi
+  </a>
+  <div class="nav-links">
+    {% if session.user_id %}
+      <a href="{{ url_for('main_home') }}" class="hide-mobile">Home</a>
+      <a href="{{ url_for('schemes.form') }}" class="hide-mobile">Find Schemes</a>
+      <a href="{{ url_for('chatbot.chatbot') }}" class="hide-mobile">AI Chat</a>
+      <a href="{{ url_for('about') }}" class="hide-mobile">About</a>
+      <span class="nav-user hide-mobile">👤 {{ session.user_name }}</span>
+      <a href="{{ url_for('auth.logout') }}" class="btn-nav" style="background:rgba(255,255,255,0.1);color:white;padding:8px 14px;border-radius:8px;font-size:0.85rem;font-weight:600;">Logout</a>
+    {% else %}
+      <a href="{{ url_for('auth.login') }}" class="hide-mobile">Login</a>
+      <a href="{{ url_for('auth.register') }}" class="btn-nav">Get Started</a>
+    {% endif %}
+
+    <!-- ② Dark mode toggle button — placed after all nav links -->
+    <button id="dark-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">🌙</button>
+  </div>
+</nav>
+
+<!-- Flash messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-container">
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">
+          {% if category == 'success' %}✅{% else %}⚠️{% endif %} {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+{% block content %}{% endblock %}
+
+<footer class="footer">
+  <p>🇮🇳 SchemeSaathi — Connecting Citizens with Government Schemes &nbsp;|&nbsp;
+     <a href="{{ url_for('about') }}">About</a>
+  </p>
+</footer>
+
+{% block scripts %}{% endblock %}
+
+<!-- ③ Dark mode toggle logic -->
+<script>
+  (function () {
+    const btn = document.getElementById('dark-toggle');
+    const root = document.documentElement;
+
+    function applyTheme(theme) {
+      if (theme === 'dark') {
+        root.setAttribute('data-theme', 'dark');
+        btn.textContent = '☀️';
+        btn.title = 'Switch to light mode';
+      } else {
+        root.removeAttribute('data-theme');
+        btn.textContent = '🌙';
+        btn.title = 'Switch to dark mode';
+      }
+    }
+
+    // Initialise from saved preference
+    applyTheme(localStorage.getItem('schemeSaathiTheme') || 'light');
+
+    btn.addEventListener('click', function () {
+      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('schemeSaathiTheme', next);
+      applyTheme(next);
+    });
+  })();
+</script>
+
+</body>
+</html>
