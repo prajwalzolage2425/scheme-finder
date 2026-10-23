@@ -15,7 +15,8 @@
       </p>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <a href="{{ url_for('schemes.form') }}" class="btn btn-secondary btn-sm">✏️ Edit Profile</a>
+      <a href="{{ url_for('auth.profile') }}" class="btn btn-secondary btn-sm">👤 My Profile</a>
+      <a href="{{ url_for('schemes.form') }}" class="btn btn-secondary btn-sm">✏️ Edit Criteria</a>
       <a href="{{ url_for('chatbot.chatbot') }}" class="btn btn-primary btn-sm">🤖 Ask AI</a>
     </div>
   </div>

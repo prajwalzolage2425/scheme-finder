@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% block title %}My Profile — SchemeSaathi{% endblock %}
+
+{% block content %}
+<div class="page-container-sm" style="padding-top:2.5rem;padding-bottom:3.5rem">
+
+  <!-- Header Banner -->
+  <div style="background:var(--navy);color:white;border-radius:var(--radius-xl);padding:2rem;margin-bottom:2rem;position:relative;overflow:hidden">
+    <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:rgba(255,107,53,0.15);border-radius:50%;pointer-events:none"></div>
+    <div style="position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.5rem">
+      <div style="display:flex;align-items:center;gap:1.25rem">
+        <div style="width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-size:2rem;border:2px solid rgba(255,255,255,0.2)">
+          👤
+        </div>
+        <div>
+          <h1 style="font-size:1.6rem;font-weight:800;line-height:1.2">{{ user.name if user else session.user_name }}</h1>
+          <p style="color:rgba(255,255,255,0.65);font-size:0.85rem;margin-top:4px">
+            {{ user.email if user else 'Registered User' }}
+            {% if user and user.phone %} &bull; 📞 {{ user.phone }}{% endif %}
+          </p>
+        </div>
+      </div>
+      <div>
+        {% if session.profile_complete or (profile and profile.annual_income) %}
+        <span style="background:rgba(39,174,96,0.2);color:#2ECC71;padding:6px 16px;border-radius:100px;font-size:0.82rem;font-weight:700;display:inline-flex;align-items:center;gap:6px">
+          ✅ Profile Complete
+        </span>
+        {% else %}
+        <span style="background:rgba(245,166,35,0.2);color:#F5A623;padding:6px 16px;border-radius:100px;font-size:0.82rem;font-weight:700;display:inline-flex;align-items:center;gap:6px">
+          ⚠️ Incomplete Profile
+        </span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Quick Shortcuts inside Banner -->
+    <div style="margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid rgba(255,255,255,0.1);display:flex;gap:12px;flex-wrap:wrap">
+      <a href="{{ url_for('schemes.results') }}" class="btn btn-primary btn-sm">
+        🎯 View Eligible Schemes
+      </a>
+      <a href="{{ url_for('chatbot.chatbot') }}" class="btn btn-sm" style="background:rgba(255,255,255,0.12);color:white;border:1px solid rgba(255,255,255,0.25)">
+        🤖 Chat with SchemeSaathi AI
+      </a>
+    </div>
+  </div>
+
+  <!-- Profile Form Card -->
+  <div class="card">
+    <div class="card-body" style="padding:2.25rem">
+      <div style="margin-bottom:1.75rem">
+        <h2 style="font-size:1.35rem;font-weight:800;color:var(--navy);display:flex;align-items:center;gap:8px">
+          📋 Eligibility & Personal Information
+        </h2>
+        <p style="color:var(--gray-md);font-size:0.88rem;margin-top:4px">
+          Your saved information is kept securely in your account so you never have to re-enter it when browsing schemes.
+        </p>
+      </div>
+
+      <form method="POST" action="{{ url_for('auth.profile') }}">
+
+        <!-- User Contact Information -->
+        <div style="margin-bottom:1.5rem">
+          <div style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--gray-md);font-weight:700;margin-bottom:0.75rem">
+            Account Details
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <input type="text" name="name" class="form-control" value="{{ user.name if user else session.user_name }}" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone Number</label>
+              <input type="tel" name="phone" class="form-control" value="{{ user.phone if user else '' }}" placeholder="10-digit mobile number">
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Eligibility Criteria -->
+        <div style="margin-bottom:1.5rem">
+          <div style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--gray-md);font-weight:700;margin-bottom:0.75rem">
+            Scheme Eligibility Parameters
+          </div>
+
+          <!-- Row 1: Income + Age -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+            <div class="form-group">
+              <label class="form-label">💰 Annual Family Income (₹)</label>
+              <input type="number" name="annual_income" class="form-control"
+                     value="{{ profile.annual_income or '' }}" placeholder="e.g. 150000" min="0" max="10000000" required>
+              <div class="form-hint">Total annual household income</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">🎂 Your Age</label>
+              <input type="number" name="age" class="form-control"
+                     value="{{ profile.age or '' }}" placeholder="e.g. 30" min="10" max="100" required>
+            </div>
+          </div>
+
+          <!-- Row 2: Gender + Caste -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+            <div class="form-group">
+              <label class="form-label">👤 Gender</label>
+              <select name="gender" class="form-control" required>
+                <option value="">Select gender</option>
+                <option value="male" {% if profile.gender == 'male' %}selected{% endif %}>Male</option>
+                <option value="female" {% if profile.gender == 'female' %}selected{% endif %}>Female</option>
+                <option value="other" {% if profile.gender == 'other' %}selected{% endif %}>Other / Prefer not to say</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">🏛️ Caste Category</label>
+              <select name="caste" class="form-control" required>
+                <option value="">Select category</option>
+                <option value="general" {% if profile.caste == 'general' %}selected{% endif %}>General / Open</option>
+                <option value="obc" {% if profile.caste == 'obc' %}selected{% endif %}>OBC (Other Backward Class)</option>
+                <option value="sc" {% if profile.caste == 'sc' %}selected{% endif %}>SC (Scheduled Caste)</option>
+                <option value="st" {% if profile.caste == 'st' %}selected{% endif %}>ST (Scheduled Tribe)</option>
+                <option value="nt" {% if profile.caste == 'nt' %}selected{% endif %}>NT (Nomadic Tribe)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Row 3: State + Area Type -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+            <div class="form-group">
+              <label class="form-label">📍 State</label>
+              <select name="state" class="form-control" required>
+                <option value="">Select state</option>
+                <option value="maharashtra" {% if profile.state == 'maharashtra' %}selected{% endif %}>Maharashtra</option>
+                <option value="uttar_pradesh" {% if profile.state == 'uttar_pradesh' %}selected{% endif %}>Uttar Pradesh</option>
+                <option value="bihar" {% if profile.state == 'bihar' %}selected{% endif %}>Bihar</option>
+                <option value="rajasthan" {% if profile.state == 'rajasthan' %}selected{% endif %}>Rajasthan</option>
+                <option value="madhya_pradesh" {% if profile.state == 'madhya_pradesh' %}selected{% endif %}>Madhya Pradesh</option>
+                <option value="west_bengal" {% if profile.state == 'west_bengal' %}selected{% endif %}>West Bengal</option>
+                <option value="karnataka" {% if profile.state == 'karnataka' %}selected{% endif %}>Karnataka</option>
+                <option value="andhra_pradesh" {% if profile.state == 'andhra_pradesh' %}selected{% endif %}>Andhra Pradesh</option>
+                <option value="telangana" {% if profile.state == 'telangana' %}selected{% endif %}>Telangana</option>
+                <option value="gujarat" {% if profile.state == 'gujarat' %}selected{% endif %}>Gujarat</option>
+                <option value="punjab" {% if profile.state == 'punjab' %}selected{% endif %}>Punjab</option>
+                <option value="haryana" {% if profile.state == 'haryana' %}selected{% endif %}>Haryana</option>
+                <option value="other" {% if profile.state == 'other' %}selected{% endif %}>Other State</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">🏘️ Area Type</label>
+              <select name="area_type" class="form-control" required>
+                <option value="">Select area</option>
+                <option value="rural" {% if profile.area_type == 'rural' %}selected{% endif %}>Rural (Village/Gram Panchayat)</option>
+                <option value="urban" {% if profile.area_type == 'urban' %}selected{% endif %}>Urban (City/Town)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Occupation -->
+          <div class="form-group">
+            <label class="form-label">💼 Occupation / Work</label>
+            <select name="occupation" class="form-control" required>
+              <option value="">Select occupation</option>
+              <option value="farmer" {% if profile.occupation == 'farmer' %}selected{% endif %}>Farmer / Agriculture</option>
+              <option value="daily_wage" {% if profile.occupation == 'daily_wage' %}selected{% endif %}>Daily Wage Worker / Labourer</option>
+              <option value="self_employed" {% if profile.occupation == 'self_employed' %}selected{% endif %}>Self Employed / Small Business</option>
+              <option value="business_owner" {% if profile.occupation == 'business_owner' %}selected{% endif %}>Business Owner / Entrepreneur</option>
+              <option value="artisan" {% if profile.occupation == 'artisan' %}selected{% endif %}>Artisan / Craftsperson / Weaver</option>
+              <option value="student" {% if profile.occupation == 'student' %}selected{% endif %}>Student</option>
+              <option value="unemployed" {% if profile.occupation == 'unemployed' %}selected{% endif %}>Unemployed / Job Seeker</option>
+              <option value="government" {% if profile.occupation == 'government' %}selected{% endif %}>Government Employee</option>
+              <option value="private" {% if profile.occupation == 'private' %}selected{% endif %}>Private Sector Employee</option>
+              <option value="homemaker" {% if profile.occupation == 'homemaker' %}selected{% endif %}>Homemaker</option>
+            </select>
+          </div>
+
+          <!-- Row 4: BPL + Bank -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+            <div class="form-group">
+              <label class="form-label">📋 BPL Card Status</label>
+              <select name="bpl_card" class="form-control">
+                <option value="no" {% if profile.bpl_card != 'yes' %}selected{% endif %}>No</option>
+                <option value="yes" {% if profile.bpl_card == 'yes' %}selected{% endif %}>Yes — BPL / Yellow Ration Card</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">🏦 Bank Account</label>
+              <select name="has_bank_account" class="form-control">
+                <option value="yes" {% if profile.has_bank_account != 'no' %}selected{% endif %}>Yes</option>
+                <option value="no" {% if profile.has_bank_account == 'no' %}selected{% endif %}>No</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:1.5rem;flex-wrap:wrap">
+          <button type="submit" class="btn btn-primary btn-lg" style="flex:1">
+            💾 Save Profile & Update Schemes
+          </button>
+          <a href="{{ url_for('schemes.results') }}" class="btn btn-secondary btn-lg">
+            Cancel
+          </a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

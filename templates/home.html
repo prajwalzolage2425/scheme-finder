@@ -14,9 +14,15 @@
     </p>
     <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
       {% if session.user_id %}
-        <a href="{{ url_for('schemes.form') }}" class="btn btn-primary btn-lg">
-          🎯 Find My Schemes
-        </a>
+        {% if session.profile_complete %}
+          <a href="{{ url_for('schemes.results') }}" class="btn btn-primary btn-lg">
+            🎯 View My Schemes
+          </a>
+        {% else %}
+          <a href="{{ url_for('schemes.form') }}" class="btn btn-primary btn-lg">
+            🎯 Find My Schemes
+          </a>
+        {% endif %}
         <a href="{{ url_for('chatbot.chatbot') }}" class="btn btn-lg" style="background:rgba(255,255,255,0.12);color:white;border:1.5px solid rgba(255,255,255,0.25)">
           🤖 Ask AI Assistant
         </a>

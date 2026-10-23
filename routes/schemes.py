@@ -21,36 +21,85 @@ def login_required(f):
 @schemes_bp.route("/form")
 @login_required
 def form():
-    return render_template("form.html")
+    db = get_db()
+    user_id = session.get("user_id")
+    profile = session.get("user_data", {})
+    if not profile and db is not None and user_id:
+        try:
+            from bson.objectid import ObjectId
+            user = db.users.find_one({"_id": ObjectId(user_id)})
+            if user and user.get("profile"):
+                profile = user.get("profile")
+                session["user_data"] = profile
+                session["profile_complete"] = True
+        except Exception:
+            pass
+    return render_template("form.html", profile=profile)
 
 
 # ─── Results Dashboard ────────────────────────────────────────────────────────
-@schemes_bp.route("/results", methods=["POST"])
+@schemes_bp.route("/results", methods=["GET", "POST"])
 @login_required
 def results():
     db = get_db()
-    user_data = {
-        "annual_income": request.form.get("annual_income", 0),
-        "age":           request.form.get("age", 25),
-        "gender":        request.form.get("gender", "").lower(),
-        "caste":         request.form.get("caste", "general").lower(),
-        "state":         request.form.get("state", "").lower().replace(" ", "_"),
-        "area_type":     request.form.get("area_type", "urban").lower(),
-        "occupation":    request.form.get("occupation", "").lower().replace(" ", "_"),
-        "bpl_card":      request.form.get("bpl_card", "no").lower(),
-        "has_bank_account": request.form.get("has_bank_account", "yes").lower()
-    }
+    user_id = session.get("user_id")
 
-    # Save search to DB
-    from datetime import datetime
-    db.searches.insert_one({
-        "user_id": session.get("user_id"),
-        "user_data": user_data,
-        "timestamp": datetime.utcnow()
-    })
+    if request.method == "POST":
+        user_data = {
+            "annual_income": request.form.get("annual_income", 0),
+            "age":           request.form.get("age", 25),
+            "gender":        request.form.get("gender", "").lower(),
+            "caste":         request.form.get("caste", "general").lower(),
+            "state":         request.form.get("state", "").lower().replace(" ", "_"),
+            "area_type":     request.form.get("area_type", "urban").lower(),
+            "occupation":    request.form.get("occupation", "").lower().replace(" ", "_"),
+            "bpl_card":      request.form.get("bpl_card", "no").lower(),
+            "has_bank_account": request.form.get("has_bank_account", "yes").lower()
+        }
 
-    # Update session for chatbot context
-    session["user_data"] = user_data
+        # Save to user profile in MongoDB permanently
+        from datetime import datetime
+        if db is not None and user_id:
+            try:
+                from bson.objectid import ObjectId
+                db.users.update_one(
+                    {"_id": ObjectId(user_id)},
+                    {"$set": {
+                        "profile": user_data,
+                        "profile_complete": True,
+                        "updated_at": datetime.utcnow()
+                    }}
+                )
+                db.searches.insert_one({
+                    "user_id": user_id,
+                    "user_data": user_data,
+                    "timestamp": datetime.utcnow()
+                })
+            except Exception as e:
+                print(f"Error persisting search profile: {e}")
+
+        # Update session
+        session["user_data"] = user_data
+        session["profile_complete"] = True
+
+    else:
+        # GET request - load existing profile from session or database
+        user_data = session.get("user_data")
+        if not user_data and db is not None and user_id:
+            try:
+                from bson.objectid import ObjectId
+                user = db.users.find_one({"_id": ObjectId(user_id)})
+                if user and user.get("profile"):
+                    user_data = user.get("profile")
+                    session["user_data"] = user_data
+                    session["profile_complete"] = True
+            except Exception:
+                pass
+
+        if not user_data:
+            from flask import flash
+            flash("Please fill in your details first to discover schemes you're eligible for.", "info")
+            return redirect(url_for("schemes.form"))
 
     eligible, explore = find_eligible_schemes(user_data)
     return render_template("results.html", eligible=eligible, explore=explore, user_data=user_data)
@@ -62,9 +111,23 @@ def results():
 def scheme_detail(scheme_id):
     scheme = get_scheme_by_id(scheme_id)
     if not scheme:
-        return redirect(url_for("main.home"))
+        return redirect(url_for("main_home"))
 
-    user_data = session.get("user_data", {})
+    user_data = session.get("user_data")
+    if not user_data:
+        db = get_db()
+        user_id = session.get("user_id")
+        if db is not None and user_id:
+            try:
+                from bson.objectid import ObjectId
+                user = db.users.find_one({"_id": ObjectId(user_id)})
+                if user and user.get("profile"):
+                    user_data = user.get("profile")
+                    session["user_data"] = user_data
+            except Exception:
+                pass
+
+    user_data = user_data or {}
 
     # Get match score
     from engine.eligibility import calculate_match_score
@@ -80,7 +143,7 @@ def scheme_detail(scheme_id):
 def checklist(scheme_id):
     scheme = get_scheme_by_id(scheme_id)
     if not scheme:
-        return redirect(url_for("main.home"))
+        return redirect(url_for("main_home"))
     return render_template("checklist.html", scheme=scheme)
 
 
@@ -90,5 +153,5 @@ def checklist(scheme_id):
 def guide(scheme_id):
     scheme = get_scheme_by_id(scheme_id)
     if not scheme:
-        return redirect(url_for("main.home"))
+        return redirect(url_for("main_home"))
     return render_template("guide.html", scheme=scheme)

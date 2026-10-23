@@ -70,18 +70,42 @@ def chat_api():
                      "You can still use the eligibility form and scheme finder above!"
         })
 
-    try:
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            max_tokens=600,
-            temperature=0.7,
-            messages=[
-                {"role": "system", "content": system},
-                *messages
-            ]
-        )
-        reply = response.choices[0].message.content
-        return jsonify({"reply": reply})
+    # Available models with priority fallback
+    configured_model = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
+    candidate_models = [
+        configured_model,
+        "openai/gpt-oss-120b",
+        "openai/gpt-oss-20b",
+        "qwen/qwen3.8-27b",
+        "allam-2-7b",
+        "llama-3.3-70b-versatile",
+        "llama-3.1-8b-instant"
+    ]
+    # Remove duplicates while preserving order
+    models_to_try = []
+    for m in candidate_models:
+        if m and m not in models_to_try:
+            models_to_try.append(m)
 
-    except Exception as e:
-        return jsonify({"reply": f"Sorry, I couldn't process that right now. Error: {str(e)}"})
+    last_error = None
+    for model_name in models_to_try:
+        try:
+            response = client.chat.completions.create(
+                model=model_name,
+                max_tokens=600,
+                temperature=0.7,
+                messages=[
+                    {"role": "system", "content": system},
+                    *messages
+                ]
+            )
+            reply = response.choices[0].message.content
+            return jsonify({"reply": reply})
+        except Exception as e:
+            last_error = e
+            err_str = str(e).lower()
+            if "model_not_found" in err_str or "does not exist" in err_str or "404" in err_str:
+                continue
+            return jsonify({"reply": f"Sorry, I couldn't process that right now. Error: {str(e)}"})
+
+    return jsonify({"reply": f"Sorry, I couldn't process that right now. Error: {str(last_error)}"})

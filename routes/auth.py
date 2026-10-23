@@ -71,10 +71,76 @@ def login():
 
         session["user_id"] = str(user["_id"])
         session["user_name"] = user["name"]
+
+        # Restore persistent user profile from database into session
+        user_profile = user.get("profile", {})
+        if user_profile:
+            session["user_data"] = user_profile
+            session["profile_complete"] = user.get("profile_complete", True)
+        else:
+            session["profile_complete"] = False
+
         flash(f"Welcome back, {user['name']}!", "success")
-        return redirect(url_for("main_home"))  # ← fixed
+        return redirect(url_for("schemes.results" if user_profile else "main_home"))
 
     return render_template("login.html", mode="login")
+
+
+# ─── Profile ──────────────────────────────────────────────────────────────────
+@auth_bp.route("/profile", methods=["GET", "POST"])
+def profile():
+    if "user_id" not in session:
+        return redirect(url_for("auth.login"))
+
+    db = get_db()
+    user_id = session.get("user_id")
+    user = None
+    if db is not None and user_id:
+        try:
+            from bson.objectid import ObjectId
+            user = db.users.find_one({"_id": ObjectId(user_id)})
+        except Exception:
+            pass
+
+    if request.method == "POST":
+        name = request.form.get("name", "").strip() or (user.get("name") if user else session.get("user_name", ""))
+        phone = request.form.get("phone", "").strip() or (user.get("phone") if user else "")
+        user_data = {
+            "annual_income": request.form.get("annual_income", 0),
+            "age":           request.form.get("age", 25),
+            "gender":        request.form.get("gender", "").lower(),
+            "caste":         request.form.get("caste", "general").lower(),
+            "state":         request.form.get("state", "").lower().replace(" ", "_"),
+            "area_type":     request.form.get("area_type", "urban").lower(),
+            "occupation":    request.form.get("occupation", "").lower().replace(" ", "_"),
+            "bpl_card":      request.form.get("bpl_card", "no").lower(),
+            "has_bank_account": request.form.get("has_bank_account", "yes").lower()
+        }
+
+        if db is not None and user_id:
+            try:
+                from bson.objectid import ObjectId
+                db.users.update_one(
+                    {"_id": ObjectId(user_id)},
+                    {"$set": {
+                        "name": name,
+                        "phone": phone,
+                        "profile": user_data,
+                        "profile_complete": True,
+                        "updated_at": datetime.utcnow()
+                    }}
+                )
+            except Exception as e:
+                print(f"Error updating user profile in MongoDB: {e}")
+
+        session["user_name"] = name
+        session["user_data"] = user_data
+        session["profile_complete"] = True
+        flash("Profile updated successfully! Here are your matched schemes.", "success")
+        return redirect(url_for("schemes.results"))
+
+    user_profile = (user.get("profile") if user else {}) or session.get("user_data", {})
+    return render_template("profile.html", user=user, profile=user_profile)
 
 
 # ─── Logout ───────────────────────────────────────────────────────────────────
