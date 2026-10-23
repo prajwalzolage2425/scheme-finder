@@ -10,8 +10,15 @@ app.secret_key = os.getenv("SECRET_KEY", "scheme-finder-secret-key-change-in-pro
 
 # ─── MongoDB Setup ────────────────────────────────────────────────────────────
 app.config["MONGO_URI"] = os.getenv("MONGO_URI", "mongodb://localhost:27017/schemefinder")
-mongo = PyMongo(app)
-app.mongo = mongo  # ← add this line
+mongo = PyMongo()
+try:
+    mongo.init_app(app)
+    app.mongo = mongo
+    print("✅ MongoDB initialized.")
+except Exception as e:
+    print(f"⚠️ [MongoDB Warning] Failed to initialize MongoDB: {e}")
+    print("👉 Please verify your MONGO_URI in Render environment variables.")
+    app.mongo = mongo
 
 # ─── Register Blueprints ──────────────────────────────────────────────────────
 from routes.auth import auth_bp
@@ -46,4 +53,6 @@ def not_found(e):
 
 # ─── Run ──────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    debug = os.getenv("FLASK_DEBUG", "False").lower() == "true"
+    app.run(debug=debug, host="0.0.0.0", port=port)
