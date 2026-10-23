@@ -17,6 +17,7 @@
 <!-- Profile Views Counter -->
 ![Profile Views](https://komarev.com/ghpvc/?username=prajwalzolage55&label=Repository+Views&color=FF6B35&style=for-the-badge&abbreviated=true)
 [![GitHub last commit](https://img.shields.io/github/last-commit/prajwalzolage55/scheme_finder?style=for-the-badge&logo=git&logoColor=white&labelColor=0A1628&color=9B59B6)](https://github.com/prajwalzolage55/scheme_finder/commits)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/prajwal-zolage-82ab10347)
 
 <!-- Badges Row 2 — Tech Stack -->
 <br/>
@@ -786,7 +787,7 @@ Distributed under the **MIT License**. See `LICENSE` for more information.
 ### **Prajwal Ashok Zolage**
 
 [![GitHub](https://img.shields.io/badge/GitHub-prajwalzolage55-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/prajwalzolage55)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/prajwalzolage55)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Prajwal_Zolage-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/prajwal-zolage-82ab10347)
 
 </div>
 
