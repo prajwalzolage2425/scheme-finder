@@ -4,7 +4,7 @@
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,9,5,30&height=250&section=header&text=🇮🇳%20SchemeSaathi&fontSize=60&fontColor=ffffff&animation=fadeIn&fontAlignY=35&desc=Connecting%20Indian%20Citizens%20with%20Government%20Welfare%20Schemes&descSize=18&descAlignY=55&descColor=ffffff" width="100%"/>
 
 <!-- Animated Typing SVG -->
-<a href="https://readme-typing-svg.demolab.com/demo/"><img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&pause=1000&color=FF6B35&center=true&vCenter=true&multiline=true&repeat=true&width=700&height=80&lines=AI-Powered+Government+Scheme+Finder+%F0%9F%8E%AF;Multilingual+Chatbot+%7C+Smart+Eligibility+Engine+%F0%9F%A4%96;Empowering+130+Crore+Indians+%F0%9F%87%AE%F0%9F%87%B3" alt="Typing SVG" /></a>
+<a href="https://readme-typing-svg.demolab.com/"><img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&pause=1000&color=FF6B35&center=true&vCenter=true&multiline=true&repeat=true&width=700&height=80&lines=AI-Powered+Government+Scheme+Finder+%F0%9F%8E%AF;Multilingual+Chatbot+%7C+Smart+Eligibility+Engine+%F0%9F%A4%96;Empowering+130+Crore+Indians+%F0%9F%87%AE%F0%9F%87%B3" alt="Typing SVG" /></a>
 
 <br/>
 
