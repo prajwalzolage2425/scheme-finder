@@ -28,16 +28,6 @@
 ![Selenium](https://img.shields.io/badge/Selenium-Scraper-43B02A?style=for-the-badge&logo=selenium&logoColor=white)
 ![Jinja2](https://img.shields.io/badge/Jinja2-Templates-B41717?style=for-the-badge&logo=jinja&logoColor=white)
 
-<br/>
-
-<!-- Star History Chart -->
-<a href="https://star-history.com/#prajwalzolage55/scheme_finder&Date">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=prajwalzolage55/scheme_finder&type=Date&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=prajwalzolage55/scheme_finder&type=Date" />
-    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=prajwalzolage55/scheme_finder&type=Date" width="550"/>
-  </picture>
-</a>
 
 </div>
 
